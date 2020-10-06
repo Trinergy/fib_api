@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/boltdb/bolt"
@@ -33,18 +34,83 @@ var store DataStore
 
 // Current returns the value of the current fibonacci sequence
 func Current(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	idx, _ := store.Get("index")
-	value, _ := store.Get(idx)
+	index, err := store.Get("index")
+	if err != nil {
+		log.Fatal(err)
+	}
+	value, err := store.Get(index)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	io.WriteString(w, value)
 }
 
 // Next returns the value of the next number in the fibonacci sequence
 func Next(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	index, _ := store.Get("index")
+	nextIndex := strIncrement(index)
+
+	nextValue, _ := store.Get(nextIndex)
+
+	// Value already exists in store
+	if len(nextValue) == 0 {
+		previousIndex := strDecrement(index)
+		currentValue, _ := store.Get(index)
+		previousValue, _ := store.Get(previousIndex)
+
+		nextValue = addStr(currentValue, previousValue)
+	}
+
+	err := store.Set(nextIndex, nextValue)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = store.Set("index", nextIndex)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	io.WriteString(w, nextValue)
 }
 
 // Previous returns the value of the previous fibonacci sequence
 func Previous(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+}
+
+func addStr(s string, s2 string) string {
+	n, err := strconv.Atoi(s)
+	if err != nil {
+		log.Fatal(err)
+	}
+	n2, err := strconv.Atoi(s2)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return strconv.Itoa(n + n2)
+}
+
+func strIncrement(s string) string {
+	n, err := strconv.Atoi(s)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	n++
+	return strconv.Itoa(n)
+}
+
+// decrement can be smart and never decrement past 0 to handle base cases
+func strDecrement(s string) string {
+	n, err := strconv.Atoi(s)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	n--
+	return strconv.Itoa(n)
 }
 
 func main() {
@@ -98,7 +164,7 @@ func (store *dbStore) Get(key string) (string, error) {
 		returnValue = make([]byte, len(v))
 		copy(returnValue, v)
 
-		fmt.Printf("GET CALL: %s", returnValue)
+		fmt.Printf("GET CALL AT: %s\n", key)
 
 		return nil
 	})
