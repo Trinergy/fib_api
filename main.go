@@ -36,11 +36,11 @@ var store DataStore
 func Current(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	index, err := store.Get("index")
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 	value, err := store.Get(index)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 
 	io.WriteString(w, value)
@@ -64,12 +64,12 @@ func Next(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	err := store.Set(nextIndex, nextValue)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 
 	err = store.Set("index", nextIndex)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 
 	io.WriteString(w, nextValue)
@@ -83,7 +83,7 @@ func Previous(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	if intIndex, err := strconv.Atoi(index); intIndex > 0 {
 		previousIndex = strDecrement(index)
 		if err != nil {
-			log.Fatal(err)
+			log.Panic(err)
 		}
 	}
 
@@ -91,7 +91,7 @@ func Previous(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	err := store.Set("index", previousIndex)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 
 	io.WriteString(w, previousValue)
@@ -100,11 +100,11 @@ func Previous(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 func addStr(s string, s2 string) string {
 	n, err := strconv.Atoi(s)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 	n2, err := strconv.Atoi(s2)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 
 	return strconv.Itoa(n + n2)
@@ -113,7 +113,7 @@ func addStr(s string, s2 string) string {
 func strIncrement(s string) string {
 	n, err := strconv.Atoi(s)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 
 	n++
@@ -131,12 +131,19 @@ func strDecrement(s string) string {
 	return strconv.Itoa(n)
 }
 
+func recoverPanicHandler(w http.ResponseWriter, r *http.Request, err interface{}) {
+	log.Println(r.URL.Path, err)
+	log.Println("Redirecting from panic to /current")
+	http.Redirect(w, r, "/current", 301)
+}
+
 func main() {
 	// Setup Routes
 	router := httprouter.New()
 	router.GET("/current/", Current)
 	router.GET("/next", Next)
 	router.GET("/previous", Previous)
+	router.PanicHandler = recoverPanicHandler
 
 	// Setup DB
 	db := newDB()
