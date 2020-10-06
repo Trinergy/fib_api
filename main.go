@@ -77,6 +77,24 @@ func Next(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 // Previous returns the value of the previous fibonacci sequence
 func Previous(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	index, _ := store.Get("index")
+	previousIndex := index
+
+	if intIndex, err := strconv.Atoi(index); intIndex > 0 {
+		previousIndex = strDecrement(index)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	previousValue, _ := store.Get(previousIndex)
+
+	err := store.Set("index", previousIndex)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	io.WriteString(w, previousValue)
 }
 
 func addStr(s string, s2 string) string {
