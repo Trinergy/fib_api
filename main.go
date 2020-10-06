@@ -145,10 +145,14 @@ func (store *dbStore) configure() error {
 		if err != nil {
 			return fmt.Errorf("create bucket: %s", err)
 		}
-		b.Put([]byte("index"), []byte("0"))
-		b.Put([]byte("0"), []byte("0"))
-		b.Put([]byte("1"), []byte("1"))
-		b.Put([]byte("2"), []byte("1"))
+
+		// Seed DB
+		if seed := b.Get([]byte("index")); len(seed) == 0 {
+			b.Put([]byte("index"), []byte("0"))
+			b.Put([]byte("0"), []byte("0"))
+			b.Put([]byte("1"), []byte("1"))
+			b.Put([]byte("2"), []byte("1"))
+		}
 
 		return nil
 	})
