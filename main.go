@@ -11,7 +11,7 @@ import (
 
 func main() {
 	// Setup DB
-	db, err := datastore.NewDB()
+	db, err := datastore.NewDB("/tmp/badger")
 	if err != nil {
 		log.Fatal(err)
 	}

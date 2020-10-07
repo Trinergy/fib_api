@@ -12,8 +12,8 @@ type DB struct {
 }
 
 // NewDB creates a brand new badger db
-func NewDB() (*DB, error) {
-	db, err := badger.Open(badger.DefaultOptions("/tmp/badger"))
+func NewDB(path string) (*DB, error) {
+	db, err := badger.Open(badger.DefaultOptions(path))
 	return &DB{DB: db}, err
 }
 
@@ -32,8 +32,8 @@ func (store *DB) Seed() error {
 	})
 }
 
-// Used for teardown in test development and test cases
-func (store *DB) dropAll() error {
+// DropAll is used for teardown in development and test cases
+func (store *DB) DropAll() error {
 	return store.DB.DropAll()
 }
 
