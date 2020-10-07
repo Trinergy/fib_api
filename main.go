@@ -2,10 +2,10 @@ package main
 
 import (
 	"log"
-	"net/http"
 
 	"github.com/Trinergy/fib_api/actions"
 	"github.com/Trinergy/fib_api/datastore"
+	"github.com/fvbock/endless"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -30,5 +30,5 @@ func main() {
 	router.GET("/next", a.Next)
 	router.GET("/previous", a.Previous)
 
-	log.Fatal(http.ListenAndServe(":8080", router))
+	err = endless.ListenAndServe("localhost:8080", router)
 }
