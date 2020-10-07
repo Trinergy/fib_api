@@ -6,15 +6,9 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"time"
 
-	"github.com/boltdb/bolt"
+	badger "github.com/dgraph-io/badger/v2"
 	"github.com/julienschmidt/httprouter"
-)
-
-const (
-	dbName = "my.db"
-	bucket = "fibonnaciBucket"
 )
 
 // DataStore is a key value store which has two methods:
@@ -26,8 +20,7 @@ type DataStore interface {
 }
 
 type dbStore struct {
-	bucket string
-	db     *bolt.DB
+	db *badger.DB
 }
 
 var store DataStore
@@ -146,8 +139,13 @@ func main() {
 	router.PanicHandler = recoverPanicHandler
 
 	// Setup DB
-	db := newDB()
-	err := db.configure()
+	db, err := newDB()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.db.Close()
+
+	err = db.configure()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -156,55 +154,53 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
-func newDB() *dbStore {
-	db, err := bolt.Open(dbName, 0600, &bolt.Options{Timeout: 1 * time.Second})
-	if err != nil {
-		log.Fatal(err)
-	}
-	return &dbStore{bucket: bucket, db: db}
+func newDB() (*dbStore, error) {
+	db, err := badger.Open(badger.DefaultOptions("/tmp/badger"))
+	return &dbStore{db: db}, err
 }
 
 func (store *dbStore) configure() error {
-	return store.db.Update(func(tx *bolt.Tx) error {
-		b, err := tx.CreateBucketIfNotExists([]byte(bucket))
-		if err != nil {
-			return fmt.Errorf("create bucket: %s", err)
-		}
-
-		// Seed DB
-		if seed := b.Get([]byte("index")); len(seed) == 0 {
-			b.Put([]byte("index"), []byte("0"))
-			b.Put([]byte("0"), []byte("0"))
-			b.Put([]byte("1"), []byte("1"))
-			b.Put([]byte("2"), []byte("1"))
+	return store.db.Update(func(tx *badger.Txn) error {
+		// Seed DB if index key is not found - should return ErrorKeyNotFound
+		if _, err := tx.Get([]byte("index")); err != nil {
+			tx.Set([]byte("index"), []byte("0"))
+			tx.Set([]byte("0"), []byte("0"))
+			tx.Set([]byte("1"), []byte("1"))
+			tx.Set([]byte("2"), []byte("1"))
 		}
 
 		return nil
 	})
+}
+
+// Used for teardown in test development and test cases
+func (store *dbStore) dropAll() error {
+	return store.db.DropAll()
 }
 
 func (store *dbStore) Get(key string) (string, error) {
-	var returnValue []byte
+	var valCopy []byte
 
-	err := store.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(store.bucket))
-		v := b.Get([]byte(key))
+	err := store.db.View(func(tx *badger.Txn) error {
+		item, err := tx.Get([]byte(key))
+		if err != nil {
+			return err
+		}
 
-		returnValue = make([]byte, len(v))
-		copy(returnValue, v)
-
-		fmt.Printf("GET CALL AT: %s\n", key)
+		valCopy, err = item.ValueCopy(nil)
+		if err != nil {
+			return err
+		}
 
 		return nil
 	})
 
-	return fmt.Sprintf("%s", returnValue), err
+	return fmt.Sprintf("%s", valCopy), err
 }
 
 func (store *dbStore) Set(key string, value string) error {
-	return store.db.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(store.bucket))
-		err := b.Put([]byte(key), []byte(value))
+	return store.db.Update(func(tx *badger.Txn) error {
+		err := tx.Set([]byte(key), []byte(value))
 		if err != nil {
 			return fmt.Errorf("set key: %s", err)
 		}
