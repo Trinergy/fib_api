@@ -17,6 +17,7 @@ func TestAction_Next(t *testing.T) {
 	}
 	db.DropAll()
 	db.Seed()
+	defer db.DropAll()
 	defer db.DB.Close()
 
 	a := Action{Store: db}
