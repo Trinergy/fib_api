@@ -41,13 +41,16 @@ func Current(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 // Next returns the value of the next number in the fibonacci sequence
 func Next(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	index, _ := store.Get("index")
+	index, err := store.Get("index")
+	if err != nil {
+		log.Panic(err)
+	}
 	nextIndex := strIncrement(index)
 
-	nextValue, _ := store.Get(nextIndex)
+	nextValue, err := store.Get(nextIndex)
 
-	// Value already exists in store
-	if len(nextValue) == 0 {
+	// next value needs to be created because key was not found
+	if err != nil {
 		previousIndex := strDecrement(index)
 		currentValue, _ := store.Get(index)
 		previousValue, _ := store.Get(previousIndex)
@@ -55,7 +58,7 @@ func Next(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		nextValue = addStr(currentValue, previousValue)
 	}
 
-	err := store.Set(nextIndex, nextValue)
+	err = store.Set(nextIndex, nextValue)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -70,7 +73,10 @@ func Next(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 // Previous returns the value of the previous fibonacci sequence
 func Previous(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	index, _ := store.Get("index")
+	index, err := store.Get("index")
+	if err != nil {
+		log.Panic(err)
+	}
 	previousIndex := index
 
 	if intIndex, err := strconv.Atoi(index); intIndex > 0 {
@@ -82,7 +88,7 @@ func Previous(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	previousValue, _ := store.Get(previousIndex)
 
-	err := store.Set("index", previousIndex)
+	err = store.Set("index", previousIndex)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -161,7 +167,7 @@ func newDB() (*dbStore, error) {
 
 func (store *dbStore) configure() error {
 	return store.db.Update(func(tx *badger.Txn) error {
-		// Seed DB if index key is not found - should return ErrorKeyNotFound
+		// Seed DB if index key is not found
 		if _, err := tx.Get([]byte("index")); err != nil {
 			tx.Set([]byte("index"), []byte("0"))
 			tx.Set([]byte("0"), []byte("0"))
