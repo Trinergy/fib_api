@@ -1,4 +1,4 @@
-package fibwithdb
+package badgerstore
 
 import (
 	"errors"

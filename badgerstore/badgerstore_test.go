@@ -1,15 +1,17 @@
-package fibwithdb
+package badgerstore
 
 import (
 	"testing"
 )
 
-// This is an integration test that will overall functionality of Database:
-// NewDB - initialization
-// Seed - seeding data
-// Get - fetching value at key
-// Set - setting value at key
-func TestFibWithDB_Integration(t *testing.T) {
+/*
+This is an integration test that will overall functionality of Database:
+NewDB - initialization
+Seed - seeding data
+Get - fetching value at key
+Set - setting value at key
+*/
+func TestBadgerStore_Integration(t *testing.T) {
 	db, err := NewDB("/tmp/badger/test")
 	if err != nil {
 		t.Error(err)
@@ -42,7 +44,7 @@ func TestFibWithDB_Integration(t *testing.T) {
 	}
 }
 
-func TestFibWithDB_Current(t *testing.T) {
+func TestBadgerStore_Current(t *testing.T) {
 	db, err := NewDB("/tmp/badger/test")
 	if err != nil {
 		t.Error(err)
@@ -61,7 +63,7 @@ func TestFibWithDB_Current(t *testing.T) {
 	}
 }
 
-func TestFibWithDB_Next(t *testing.T) {
+func TestBadgerStore_Next(t *testing.T) {
 	db, err := NewDB("/tmp/badger/test")
 	if err != nil {
 		t.Error(err)
@@ -80,7 +82,7 @@ func TestFibWithDB_Next(t *testing.T) {
 	}
 }
 
-func TestFibWithDB_Previous(t *testing.T) {
+func TestBadgerStore_Previous(t *testing.T) {
 	db, err := NewDB("/tmp/badger/test")
 	if err != nil {
 		t.Error(err)
@@ -100,7 +102,7 @@ func TestFibWithDB_Previous(t *testing.T) {
 }
 
 // This tests the business logic of the fibonacci sequence
-func TestFibWithDB_FibLogic(t *testing.T) {
+func TestBadgerStore_FibLogic(t *testing.T) {
 	db, err := NewDB("/tmp/badger/test")
 	if err != nil {
 		t.Error(err)

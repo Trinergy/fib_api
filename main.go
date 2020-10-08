@@ -4,14 +4,14 @@ import (
 	"log"
 
 	"github.com/Trinergy/fib_api/actions"
-	"github.com/Trinergy/fib_api/fibwithdb"
+	"github.com/Trinergy/fib_api/badgerstore"
 	"github.com/fvbock/endless"
 	"github.com/julienschmidt/httprouter"
 )
 
 func main() {
 	// Setup DB
-	db, err := fibwithdb.NewDB("/tmp/badger")
+	db, err := badgerstore.NewDB("/tmp/badger")
 	if err != nil {
 		log.Fatal(err)
 	}
