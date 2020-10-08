@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -13,8 +14,9 @@ func (action *Action) Current(w http.ResponseWriter, r *http.Request, _ httprout
 	value, err := action.Store.Current()
 	if err != nil {
 		log.Println(err)
+		s := fmt.Sprintf("500 Something bad happened: %s", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("500 - Something bad happened!"))
+		w.Write([]byte(s))
 		return
 	}
 

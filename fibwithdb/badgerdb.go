@@ -1,6 +1,7 @@
 package fibwithdb
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 
@@ -115,6 +116,15 @@ func (store *DB) Next() (string, error) {
 		nextValue, err = addStr(currentValue, previousValue)
 		if err != nil {
 			return "", err
+		}
+
+		// Check for integer overflow
+		num, err := strconv.Atoi(nextValue)
+		if err != nil {
+			return "", err
+		}
+		if num < 0 {
+			return "", errors.New("One does not simply fib - integer overflow")
 		}
 	}
 
