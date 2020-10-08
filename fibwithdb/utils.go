@@ -1,4 +1,4 @@
-package actions
+package fibwithdb
 
 import (
 	"strconv"
@@ -29,7 +29,6 @@ func strIncrement(s string) (string, error) {
 	return strconv.Itoa(n), nil
 }
 
-// decrement can be smart and never decrement past 0 to handle base cases
 func strDecrement(s string) (string, error) {
 	n, err := strconv.Atoi(s)
 	if err != nil {

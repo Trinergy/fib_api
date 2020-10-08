@@ -10,14 +10,7 @@ import (
 
 // Current returns the value of the current fibonacci sequence
 func (action *Action) Current(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	index, err := action.Store.Get("index")
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("500 - Something bad happened!"))
-		return
-	}
-	value, err := action.Store.Get(index)
+	value, err := action.Store.Current()
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
