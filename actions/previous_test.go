@@ -6,12 +6,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/Trinergy/fib_api/fibwithdb"
+	"github.com/Trinergy/fib_api/badgerstore"
 	"github.com/julienschmidt/httprouter"
 )
 
 func TestAction_Previous(t *testing.T) {
-	db, err := fibwithdb.NewDB("/tmp/badger/test")
+	db, err := badgerstore.NewDB("/tmp/badger/test")
 	if err != nil {
 		t.Error(err)
 	}

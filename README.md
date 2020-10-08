@@ -22,8 +22,7 @@ go run main.go
 ```
 
 ## Benchmark
-Benchmarked using [Docker](https://www.docker.com) and [wrk](https://github.com/wg/wrk)
-Based on the following specifications:
+Benchmarked using [Docker](https://www.docker.com) and [wrk](https://github.com/wg/wrk) based on the following specifications:
 * 512MB RAM
 * 1 CPU
 
@@ -69,4 +68,4 @@ wrk -t1 -c100 -d5s http://127.0.0.1:8080/current
 ```
 ### Comments
 * Using [endless](https://github.com/fvbock/endless) to handle graceful restarts, but would probably use a real supervisor in production
-* Errors in HTTP handlers just print to std.out, but would probably be sent to a monitoring system in production
+* Errors in HTTP handlers print to standard error, but would probably be sent to a monitoring system in production
