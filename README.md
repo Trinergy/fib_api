@@ -22,39 +22,40 @@ go run main.go
 ```
 
 ## Benchmark
-Benchmarked with [Docker](https://www.docker.com) and [wrk](https://github.com/wg/wrk) according to the following specifications:
+Benchmarked using [Docker](https://www.docker.com) and [wrk](https://github.com/wg/wrk)
+Based on the following specifications:
 * 512MB RAM
 * 1 CPU
 
 ### Results
 ```
 Running 5s test @ http://127.0.0.1:8080/current
-  1 threads and 10 connections
+  1 threads and 100 connections
   Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency     8.22ms   11.71ms  66.62ms   83.26%
-    Req/Sec     3.03k   398.01     3.99k    82.00%
-  15117 requests in 5.02s, 2.83MB read
-Requests/sec:   3013.67
-Transfer/sec:    576.84KB
+    Latency    30.74ms   25.42ms 119.35ms   68.97%
+    Req/Sec     3.69k   663.34     4.96k    70.00%
+  18392 requests in 5.02s, 3.44MB read
+Requests/sec:   3664.52
+Transfer/sec:    701.41KB
 
 Running 5s test @ http://127.0.0.1:8080/previous
-  1 threads and 10 connections
+  1 threads and 100 connections
   Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency     9.74ms   13.22ms  57.76ms   82.41%
-    Req/Sec     2.42k   276.02     3.19k    76.47%
-  12297 requests in 5.10s, 1.37MB read
-Requests/sec:   2411.15
-Transfer/sec:    275.95KB
+    Latency    41.00ms   30.35ms 182.62ms   61.27%
+    Req/Sec     2.47k   535.60     3.55k    66.00%
+  12326 requests in 5.03s, 1.41MB read
+Requests/sec:   2452.75
+Transfer/sec:    287.75KB
 
 Running 5s test @ http://127.0.0.1:8080/next
-  1 threads and 20 connections
+  1 threads and 100 connections
   Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency    13.79ms   16.11ms  76.43ms   81.36%
-    Req/Sec     2.59k   314.92     3.48k    62.75%
-  13127 requests in 5.10s, 2.51MB read
-  Non-2xx or 3xx responses: 12229
-Requests/sec:   2573.94
-Transfer/sec:    504.25KB
+    Latency    42.63ms   34.17ms 210.69ms   65.07%
+    Req/Sec     2.46k   367.12     3.42k    74.00%
+  12235 requests in 5.02s, 1.96MB read
+  Non-2xx or 3xx responses: 6247
+Requests/sec:   2439.63
+Transfer/sec:    399.50KB
 ```
 Note: `Non-2xx or 3xx responses` from `/next` endpoint are expected for handling integer overflow
 ### How to benchmark
@@ -64,7 +65,8 @@ docker build -t fib-api .
 docker run --mount type=tmpfs,destination=/tmp/ -p 8080:8080 -d --cpus=1 --memory="512m" fib-api
 
 // Benchmark
-wrk -t1 -c10 -d5s http://127.0.0.1:8080/current
+wrk -t1 -c100 -d5s http://127.0.0.1:8080/current
 ```
 ### Comments
-Used [endless](https://github.com/fvbock/endless) to handle graceful restarts, but would probably use a real supervisor in production
+* Using [endless](https://github.com/fvbock/endless) to handle graceful restarts, but would probably use a real supervisor in production
+* Errors in HTTP handlers just print to std.out, but would probably be sent to a monitoring system in production
