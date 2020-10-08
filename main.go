@@ -30,5 +30,5 @@ func main() {
 	router.GET("/next", a.Next)
 	router.GET("/previous", a.Previous)
 
-	err = endless.ListenAndServe("localhost:8080", router)
+	err = endless.ListenAndServe("0.0.0.0:8080", router)
 }
