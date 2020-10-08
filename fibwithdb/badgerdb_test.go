@@ -42,7 +42,6 @@ func TestFibWithDB_Integration(t *testing.T) {
 	}
 }
 
-//
 func TestFibWithDB_Current(t *testing.T) {
 	db, err := NewDB("/tmp/badger/test")
 	if err != nil {

@@ -56,12 +56,15 @@ Running 5s test @ http://127.0.0.1:8080/next
 Requests/sec:   2573.94
 Transfer/sec:    504.25KB
 ```
-Note: `Non-2xx or 3xx responses` from `/next` are expected responses for handling integer overflow
+Note: `Non-2xx or 3xx responses` from `/next` endpoint are expected for handling integer overflow
 ### How to benchmark
 ```
+// Setup
 docker build -t fib-api .
 docker run --mount type=tmpfs,destination=/tmp/ -p 8080:8080 -d --cpus=1 --memory="512m" fib-api
+
+// Benchmark
 wrk -t1 -c10 -d5s http://127.0.0.1:8080/current
 ```
 ### Comments
-Used [endless](https://github.com/fvbock/endless) to handle gracefully restarts, but would probably use a real supervisor in production
+Used [endless](https://github.com/fvbock/endless) to handle graceful restarts, but would probably use a real supervisor in production
